@@ -22,5 +22,11 @@
     "husky": "^9.1.5",
     "@commitlint/cli": "^19.4.0",
     "@commitlint/config-conventional": "^19.4.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "postcss": "^8.5.23",
+      "serialize-javascript": "^7.0.3"
+    }
   }
 }

@@ -55,6 +55,34 @@ jobs:
           retention-days: 7
 
   # ---------------------------------------------------------------------------
+  # apps/ocr (Next.js) — lint + typecheck. No tests yet: the service is a
+  # placeholder, and a coverage gate on a stub reports nothing useful.
+  # ---------------------------------------------------------------------------
+  ocr-checks:
+    name: ocr / lint, typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm --filter ocr lint
+
+      - name: Typecheck
+        run: pnpm --filter ocr typecheck
+
+  # ---------------------------------------------------------------------------
   # Build.
   #
   # TODO: re-insert the SonarCloud quality-gate job between web-checks and build
@@ -73,7 +101,7 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    needs: [web-checks]
+    needs: [web-checks, ocr-checks]
     steps:
       - uses: actions/checkout@v4
 
@@ -90,7 +118,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build
-        run: pnpm --filter web build
+        run: pnpm build # every app under apps/*, not just web
         env:
           # `next build` evaluates every page module to collect route config, and
           # lib/config/{env,serverEnv}.ts both validate at module load - so all
